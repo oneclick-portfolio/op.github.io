@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -9,30 +10,45 @@
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
   <style>
     :root {
-      --paper: #ededed;
-      --ink: #0f0f0f;
-      --muted: #585858;
-      --line: #c7c7c7;
-      --panel: #ffffff;
-      --accent: #0e7c74;
-      --accent-soft: #d9f2ee;
-      --shadow: 0 14px 32px rgba(0, 0, 0, 0.08);
-      --radius: 12px;
+      --primary: #00615b;
+      --primary-container: #0e7c74;
+      --primary-fixed: #98f2e8;
+      --surface: #f9f9f9;
+      --surface-container-low: #f4f3f3;
+      --surface-container-high: #e8e8e8;
+      --surface-container-lowest: #ffffff;
+      --inverse-surface: #2f3131;
+      --on-surface: #1a1c1c;
+      --on-surface-variant: #3e4947;
+      --outline-variant: #bdc9c6;
+      --border-ghost: rgba(189, 201, 198, 0.25);
+      --shadow-diffused: 0 20px 40px rgba(0, 97, 91, 0.06);
+      --error: #ba1a1a;
+      --radius: 1.5rem;
     }
 
-    *, *::before, *::after {
+    [hidden] {
+      display: none !important;
+    }
+
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
-      background: radial-gradient(circle at 88% -20%, #ffffff 0%, #ececec 60%);
-      color: var(--ink);
-      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      background: var(--surface);
+      color: var(--on-surface);
+      font-family: "Inter", Arial, sans-serif;
       min-height: 100%;
     }
 
@@ -40,12 +56,14 @@
       overflow: hidden;
     }
 
+    /* --- Loading Screen Styles --- */
     #loader-wrapper {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
       width: 100vw;
       height: 100vh;
-      background: #ffffff;
+      background-color: #ffffff;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -53,24 +71,50 @@
       transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
     }
 
-    .signature-svg {
-      width: min(350px, 72vw);
+    /* Target the SVG specifically */
+    .text-svg {
+      width: 400px;
       height: auto;
-      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+      filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.1));
     }
 
-    .signature-svg path {
+    /* Target the paths inside the SVG */
+    .text-svg path {
+      /* 1. Set up the pen stroke */
       stroke: #000000;
       stroke-width: 2px;
-      fill: transparent;
+
+      /* FORCES the inside of the letters to remain completely hollow/transparent */
+      fill: transparent !important;
+
+      /* 2. Set up the drawing length */
       stroke-dasharray: 15000;
       stroke-dashoffset: 15000;
-      animation: drawOutline 3s ease-in-out forwards, fillShape 0.8s ease-in 3s forwards;
+
+      /* 3. ONLY animate the outline (removed the fill animation) */
+      animation: drawOutline 3s ease-in-out forwards;
+    }
+
+    /* Draws the line */
+    @keyframes drawOutline {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    /* --- Main Content Styles --- */
+    #main-content {
+      opacity: 0;
+      transition: opacity 1s ease-in;
     }
 
     .fade-out {
       opacity: 0;
       visibility: hidden;
+    }
+
+    .fade-in {
+      opacity: 1 !important;
     }
 
     a {
@@ -92,100 +136,120 @@
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 14px 18px;
-      margin: -20px -20px 12px;
-      backdrop-filter: blur(8px);
-      background: rgba(237, 237, 237, 0.88);
-      border-bottom: 1px solid rgba(15, 15, 15, 0.1);
+      padding: 14px 24px;
+      margin: -20px -20px 32px;
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid var(--border-ghost);
+      border-radius: 999px;
+    }
+
+    @media (min-width: 760px) {
+      .topbar {
+        margin-top: 20px;
+      }
     }
 
     .brand {
       display: inline-flex;
       align-items: center;
       gap: 10px;
+      font-family: "Space Grotesk", sans-serif;
       font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      font-size: 13px;
+      letter-spacing: -0.02em;
+      font-size: 15px;
     }
 
     .brand-mark {
-      width: 22px;
-      height: 22px;
-      border: 2px solid var(--ink);
-      transform: rotate(-12deg);
-      border-radius: 4px;
+      width: 28px;
+      height: 28px;
       display: inline-block;
+      image-rendering: pixelated;
+      mix-blend-mode: multiply;
     }
 
     .topnav {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 12px;
       align-items: center;
       justify-content: center;
     }
 
     .chip {
-      border: 1px solid var(--line);
-      padding: 7px 12px;
+      padding: 8px 16px;
       border-radius: 999px;
-      background: #fff;
+      background: var(--surface-container-high);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 12px;
-      font-weight: 600;
-      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+      font-weight: 500;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      border: none;
     }
 
     .chip:hover,
     .chip:focus-visible {
-      background: var(--ink);
-      color: #fff;
-      transform: translateY(-1px);
+      background: var(--surface-container-lowest);
+      box-shadow: var(--shadow-diffused);
+      transform: translateY(-2px);
       outline: none;
     }
 
     .btn {
-      border: 1px solid var(--ink);
-      background: #fff;
-      color: var(--ink);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--border-ghost);
+      color: var(--on-surface);
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 500;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 14px;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .btn:hover,
     .btn:focus-visible {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-diffused);
       outline: none;
     }
 
     .btn:disabled {
-      opacity: 0.48;
+      opacity: 0.5;
       cursor: not-allowed;
       transform: none;
       box-shadow: none;
     }
 
     .btn-primary {
-      background: var(--ink);
+      background: linear-gradient(135deg, var(--primary), var(--primary-container));
       color: #fff;
+      border: none;
+      font-weight: 600;
     }
 
     .btn-ghost {
+      border-color: transparent;
       background: transparent;
-      border-color: var(--line);
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface-container-low);
+      box-shadow: none;
+      transform: none;
     }
 
     .headline {
-      display: grid;
-      grid-template-columns: 1.08fr 0.92fr;
-      gap: 26px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      margin-top: 8px;
+      margin-top: 80px;
+      margin-bottom: 80px;
       animation: rise 0.45s ease both;
     }
 
@@ -193,89 +257,67 @@
       display: inline-flex;
       gap: 6px;
       align-items: center;
-      border: 1px solid #a7d7cf;
-      background: #e5f7f4;
+      background: var(--surface-container-low);
       border-radius: 999px;
-      padding: 6px 11px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      margin-bottom: 12px;
-      text-transform: uppercase;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-weight: 500;
+      margin-bottom: 24px;
+      border: none;
+      color: var(--primary);
     }
 
     .headline h1 {
       margin: 0;
-      font-size: clamp(2.1rem, 6vw, 4.2rem);
-      line-height: 0.96;
-      letter-spacing: -0.035em;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2.5rem, 6vw, 3.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
       font-weight: 700;
-      max-width: 13ch;
     }
 
     .headline p {
-      margin: 14px 0 0;
-      color: var(--muted);
-      font-size: 17px;
-      max-width: 35ch;
-      line-height: 1.45;
+      margin: 24px auto 0;
+      color: var(--on-surface-variant);
+      font-size: 18px;
+      max-width: 40ch;
+      line-height: 1.6;
     }
 
     .hero-actions {
-      margin-top: 22px;
+      margin-top: 32px;
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 16px;
+      justify-content: center;
     }
 
-    .terminal-card {
-      background: #070707;
-      color: #d0ffd2;
-      border: 1px solid #2d2d2d;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      min-height: 250px;
-    }
 
-    .terminal-top {
-      padding: 8px 12px;
-      border-bottom: 1px solid #262626;
-      background: #161616;
-      color: #d5d5d5;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .terminal-lines {
-      margin: 0;
-      padding: 14px 14px 18px;
-      font-size: 12px;
-      line-height: 1.55;
-      white-space: pre-wrap;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      min-height: 216px;
-    }
 
     .section-title {
-      margin: 44px 0 14px;
-      font-family: "Abril Fatface", Georgia, serif;
-      font-size: clamp(2.2rem, 5vw, 4.2rem);
-      line-height: 0.95;
+      margin: 80px auto 16px;
+      text-align: center;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2rem, 4vw, 2.5rem);
+      line-height: 1.1;
       letter-spacing: -0.02em;
-      font-weight: 400;
+      font-weight: 600;
       animation: rise 0.45s ease both;
     }
 
     .section-sub {
-      margin: 0 0 18px;
-      color: var(--muted);
-      max-width: 68ch;
-      line-height: 1.48;
+      margin: 0 auto 32px;
+      text-align: center;
+      color: var(--on-surface-variant);
+      max-width: 50ch;
+      line-height: 1.6;
+      font-size: 1.1rem;
     }
 
     .step-section {
-      margin-top: 12px;
+      margin-top: 100px;
+      scroll-margin-top: 100px;
     }
 
     .step-section[hidden] {
@@ -286,7 +328,7 @@
     .cards-2,
     .theme-grid {
       display: grid;
-      gap: 12px;
+      gap: 24px;
     }
 
     .cards-3,
@@ -299,167 +341,217 @@
     }
 
     .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 15px;
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--border-ghost);
+      border-radius: 1.5rem;
+      box-shadow: var(--shadow-diffused);
+      padding: 40px;
       animation: rise 0.4s ease both;
+      text-align: center;
     }
 
     .panel h3 {
       margin: 0;
-      font-size: 26px;
-      line-height: 1;
-      letter-spacing: -0.02em;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.5rem;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      margin-bottom: 12px;
     }
 
     .panel p {
-      margin: 8px 0 12px;
-      color: var(--muted);
-      line-height: 1.4;
-      font-size: 14px;
+      margin: 0 0 24px;
+      color: var(--on-surface-variant);
+      line-height: 1.5;
+      font-size: 15px;
     }
 
     .mini-list {
       margin: 0;
-      padding-left: 18px;
-      color: #2e2e2e;
-      font-size: 13px;
-      line-height: 1.45;
+      padding: 0;
+      list-style-position: inside;
+      color: var(--on-surface-variant);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .mini-list li {
+      margin-bottom: 8px;
     }
 
     .field,
     .url-field {
       width: 100%;
-      border: 1px solid #272727;
-      border-radius: 8px;
-      padding: 10px 11px;
-      background: #fff;
-      color: #0f0f0f;
+      border: 1px solid transparent;
+      border-radius: 1.5rem;
+      padding: 16px 20px;
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      font-size: 15px;
+      margin-bottom: 16px;
+      transition: background 0.2s, border 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    .field[type="file"] {
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+
+    /* Style the browser file button */
+    .field[type="file"]::file-selector-button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 1.5rem;
+      padding: 8px 16px;
+      margin-right: 16px;
+      font-family: inherit;
+      font-weight: 600;
       font-size: 13px;
-      margin-bottom: 9px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .field[type="file"]::file-selector-button:hover {
+      background: var(--primary-container);
+    }
+
+    .field:focus,
+    .url-field:focus {
+      background: var(--surface-container-lowest);
+      border: 1px solid rgba(0, 97, 91, 0.4);
+      box-shadow: 0 0 0 4px rgba(0, 97, 91, 0.05);
     }
 
     .auth-panel {
-      max-width: 620px;
-      margin: 34px auto 0;
+      max-width: 600px;
       text-align: center;
-      padding: 24px 20px;
+      padding: 48px;
+      margin: 0 auto;
     }
 
     .auth-panel ul {
-      text-align: left;
-      margin: 12px auto;
-      max-width: 500px;
-      color: #2b2b2b;
-      font-size: 13px;
-      line-height: 1.5;
+      margin: 24px 0 32px;
     }
 
     .auth-note {
-      margin-top: 10px;
+      margin-top: 20px;
+      display: block;
+      font-family: ui-monospace, monospace;
       font-size: 12px;
-      color: var(--muted);
+      color: var(--on-surface-variant);
+      line-height: 1.5;
     }
 
     .upload-status {
-      margin-top: 10px;
+      margin-top: 16px;
+      display: block;
+      font-family: ui-monospace, monospace;
       font-size: 12px;
-      color: #2f5c57;
+      color: var(--primary);
       min-height: 1.2em;
     }
 
     .theme-card {
-      background: #fff;
-      border: 1px solid #1f1f1f;
-      border-radius: 10px;
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--border-ghost);
+      border-radius: 1.5rem;
       overflow: hidden;
-      transition: transform 0.16s ease, box-shadow 0.16s ease;
       display: block;
       color: inherit;
+      box-shadow: var(--shadow-diffused);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .theme-card:hover,
     .theme-card:focus-within {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow);
+      transform: translateY(-4px);
+      box-shadow: 0 24px 48px rgba(0, 97, 91, 0.08);
     }
 
     .theme-preview {
-      height: 56px;
-      border-bottom: 1px solid #1f1f1f;
+      height: 120px;
       background-size: cover;
       background-position: center;
     }
 
     .theme-body {
-      padding: 10px;
+      padding: 24px;
     }
 
     .theme-top {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
-      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
     }
 
     .theme-name {
       margin: 0;
-      font-size: 25px;
-      line-height: 1;
-      letter-spacing: -0.03em;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+      font-weight: 600;
     }
 
     .tag {
-      border: 1px solid #0f0f0f;
+      background: var(--primary-fixed);
+      color: var(--primary-fixed-variant);
       border-radius: 999px;
-      padding: 2px 7px;
-      font-size: 10px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-family: ui-monospace, monospace;
       font-weight: 700;
-      letter-spacing: 0.05em;
       text-transform: uppercase;
+      border: none;
     }
 
     .theme-actions {
       display: flex;
-      gap: 8px;
+      gap: 12px;
       align-items: center;
-      margin-top: 10px;
-      flex-wrap: wrap;
+      margin-top: 24px;
     }
 
     .radio {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      font-weight: 600;
+      gap: 8px;
+      font-size: 14px;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 500;
+      cursor: pointer;
     }
 
     .deploy-layout {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
       align-items: start;
     }
 
     .status-line {
-      margin: 8px 0 0;
+      margin-top: 16px;
+      display: block;
+      font-family: ui-monospace, monospace;
       font-size: 13px;
-      color: #234f4a;
+      color: var(--primary);
       min-height: 1.2em;
     }
 
     .deploy-result {
-      border: 1px solid #9ecdc8;
-      background: #ebfaf7;
-      color: #12413d;
-      border-radius: 9px;
-      padding: 10px;
-      margin-top: 10px;
+      background: var(--surface-container-low);
+      border-radius: 1rem;
+      padding: 16px 20px;
+      margin-top: 16px;
+      font-family: ui-monospace, monospace;
       font-size: 13px;
-      line-height: 1.45;
+    }
+
+    .deploy-result a {
+      color: var(--primary);
+      text-decoration: underline;
     }
 
     .deploy-result[hidden] {
@@ -467,62 +559,83 @@
     }
 
     .footer {
-      margin-top: 34px;
-      border-top: 1px solid var(--line);
-      padding-top: 18px;
+      margin-top: 100px;
+      padding: 40px 0;
       display: flex;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 10px;
-      color: #3d3d3d;
+      gap: 16px;
+      color: var(--on-surface-variant);
+      font-family: ui-monospace, monospace;
       font-size: 12px;
-      font-weight: 600;
+      border-top: 1px solid var(--border-ghost);
     }
 
     @keyframes rise {
       from {
-        transform: translateY(8px);
+        transform: translateY(12px);
         opacity: 0;
       }
+
       to {
         transform: translateY(0);
         opacity: 1;
       }
     }
 
-    @keyframes drawOutline {
-      to {
-        stroke-dashoffset: 0;
-      }
+    .cursor-target {
+      position: relative;
+      display: inline-block;
     }
 
-    @keyframes fillShape {
-      from {
-        fill: transparent;
+    .pixel-cursor {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      top: 10px;
+      left: 100%;
+      margin-left: 10px;
+      transform: rotate(-10deg);
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      image-rendering: pixelated;
+      animation: cursor-float 1.5s ease-in-out infinite;
+    }
+
+    @keyframes cursor-float {
+
+      0%,
+      100% {
+        transform: translate(0, 0) rotate(-10deg);
       }
-      to {
-        fill: rgba(0, 0, 0, 1);
+
+      50% {
+        transform: translate(8px, -8px) rotate(-5deg);
       }
     }
 
     @media (max-width: 980px) {
+
       .headline,
       .deploy-layout {
         grid-template-columns: 1fr;
-      }
-
-      .headline h1 {
-        max-width: none;
       }
     }
 
     @media (max-width: 760px) {
       .page {
-        padding: 14px 14px 48px;
+        padding: 16px;
       }
 
       .topbar {
-        margin: -14px -14px 10px;
+        border-radius: 12px;
+        margin: 0 0 24px;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .topnav {
+        justify-content: flex-start;
       }
 
       .cards-3,
@@ -532,67 +645,91 @@
       }
 
       .section-title {
-        margin-top: 30px;
+        margin-top: 40px;
       }
     }
   </style>
 </head>
+
 <body class="is-loading">
-  <div id="loader-wrapper" aria-hidden="true">
-    <svg class="signature-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-      <g>
-        <path d="M 326.22 875.44 C320.67,871.55 325.31,865.14 337.26,860.17 C344.24,857.27 367.92,850.00 370.38,850.00 C372.16,850.00 408.72,839.95 430.00,833.61 C462.72,823.87 544.11,796.16 578.50,783.05 C584.55,780.75 612.00,770.39 639.50,760.03 C667.00,749.67 690.62,740.72 692.00,740.14 C697.75,737.71 745.78,720.81 761.50,715.68 C803.21,702.07 837.09,692.75 869.00,686.11 C900.31,679.59 902.43,678.87 901.51,675.10 C901.16,673.67 899.02,669.41 896.76,665.64 C891.18,656.35 886.70,643.98 883.50,629.00 C882.03,622.12 879.98,612.98 878.94,608.68 C876.84,599.96 869.94,584.76 865.09,578.20 C860.76,572.33 853.72,568.00 848.55,568.01 C839.02,568.03 825.82,579.61 812.07,600.00 C785.11,640.00 768.83,655.12 750.98,656.74 C745.94,657.19 744.27,656.88 739.58,654.58 C732.91,651.32 729.60,647.57 727.34,640.70 C725.90,636.35 725.60,630.99 725.49,607.76 C725.41,592.50 725.05,579.72 724.69,579.35 C723.56,578.23 719.17,589.40 709.50,618.00 C704.38,633.12 699.53,647.33 698.71,649.57 C693.99,662.44 685.69,673.98 676.36,680.64 C669.88,685.26 669.22,685.50 663.02,685.50 C654.52,685.50 651.32,683.30 647.44,674.79 C644.79,668.98 644.55,667.39 644.18,654.00 C643.73,637.13 645.66,617.89 649.55,600.58 C650.97,594.22 651.97,588.00 651.75,586.76 C651.15,583.28 648.02,590.91 638.51,619.00 C628.24,649.35 626.79,653.24 621.46,664.67 C610.78,687.57 596.96,701.00 584.09,701.00 C572.66,701.00 567.75,690.36 570.06,670.60 C572.05,653.49 582.36,615.01 596.41,572.29 C609.39,532.78 612.93,520.60 611.76,519.43 C610.73,518.40 599.11,524.96 578.23,538.35 C546.05,559.01 537.82,563.44 520.50,569.45 C516.10,570.97 511.91,572.77 511.20,573.45 C510.48,574.12 509.46,577.79 508.92,581.59 C506.96,595.51 499.04,606.84 484.87,616.01 C481.37,618.28 458.82,629.97 434.77,641.99 C390.02,664.34 385.77,666.70 383.95,670.09 C383.37,671.17 382.25,681.15 381.45,692.27 C379.75,716.02 379.90,714.82 374.96,745.00 C372.84,757.92 370.15,775.01 368.97,782.96 C367.80,790.92 366.37,798.35 365.80,799.46 C363.78,803.41 359.61,806.98 356.31,807.60 C347.68,809.22 342.19,803.12 329.15,777.40 C311.49,742.57 304.31,733.02 285.85,719.84 C267.98,707.09 263.47,701.03 264.21,690.82 C265.18,677.35 275.41,672.00 313.50,665.03 C331.01,661.82 342.27,659.21 353.00,655.86 C365.79,651.86 370.91,649.31 371.45,646.66 C371.70,645.47 372.37,635.50 372.94,624.50 C373.52,613.50 374.88,594.60 375.98,582.50 C377.08,570.40 378.67,552.40 379.53,542.50 C380.39,532.60 381.94,514.83 382.99,503.00 C385.34,476.40 387.57,444.23 389.03,416.00 C389.63,404.17 390.47,388.20 390.88,380.50 C391.96,360.41 391.18,359.36 385.50,373.25 C383.42,378.34 375.90,396.23 368.79,413.00 C361.68,429.77 354.35,447.10 352.50,451.50 C350.66,455.90 347.35,463.77 345.16,469.00 C342.97,474.23 335.55,492.45 328.66,509.50 C321.78,526.55 312.26,549.95 307.50,561.50 C302.75,573.05 295.98,589.47 292.47,598.00 C284.71,616.83 275.37,640.64 264.98,668.00 C260.70,679.28 254.43,695.70 251.04,704.50 C234.73,746.85 232.23,753.55 214.47,802.50 C197.44,849.46 192.59,861.16 188.57,864.94 C183.05,870.12 173.55,867.95 169.83,860.67 C167.95,856.99 167.88,856.12 168.99,851.06 C171.01,841.82 206.26,756.20 223.10,719.61 C241.50,679.64 243.45,675.34 253.33,653.00 C258.55,641.17 264.48,627.90 266.50,623.50 C268.52,619.10 271.30,613.03 272.68,610.00 C274.06,606.97 282.96,587.85 292.46,567.50 C335.65,474.95 351.01,437.72 378.28,359.50 C390.97,323.10 393.54,314.15 396.50,296.00 C402.70,257.95 408.04,238.86 414.71,230.93 C418.86,226.00 426.55,227.08 428.97,232.93 C430.72,237.16 429.31,244.28 421.61,270.11 C418.10,281.87 414.50,294.05 413.61,297.16 C411.24,305.47 408.47,322.63 405.50,347.50 C404.05,359.60 402.22,374.90 401.43,381.50 C393.32,449.22 388.19,518.90 386.01,591.00 C384.64,636.59 384.67,639.93 386.47,640.63 C388.80,641.52 432.99,618.67 457.46,603.91 C471.11,595.68 477.06,590.69 480.25,584.78 C482.32,580.95 482.47,578.62 480.75,577.26 C480.06,576.71 474.11,575.08 467.52,573.62 C454.45,570.73 446.55,567.47 436.82,560.92 C422.10,551.02 415.89,543.84 411.32,531.38 C404.99,514.15 408.13,487.66 419.10,465.82 C425.92,452.26 446.45,428.96 455.52,424.49 C460.81,421.88 468.27,422.01 473.65,424.79 C483.90,430.10 490.85,445.15 494.05,469.00 C497.41,494.00 506.64,538.65 509.05,541.57 C513.44,546.85 532.32,538.39 567.56,515.36 C608.95,488.31 619.47,484.39 630.50,491.88 C640.41,498.61 642.08,508.33 636.91,529.14 C634.92,537.14 629.11,553.87 619.16,580.18 C608.16,609.29 594.00,656.65 594.00,664.32 C594.00,667.04 594.18,667.25 595.45,665.96 C597.58,663.80 610.89,636.65 617.92,620.13 C623.72,606.50 633.54,580.80 645.67,547.50 C654.07,524.44 666.05,494.81 668.21,491.73 C674.35,483.01 686.76,484.69 690.07,494.70 C692.77,502.89 688.20,531.36 678.95,564.00 C669.38,597.79 667.03,609.13 665.05,631.10 C664.02,642.46 664.53,656.62 666.04,659.07 C667.78,661.88 678.58,649.13 682.61,639.50 C687.91,626.86 700.72,584.07 708.48,553.13 C716.53,521.06 720.68,514.94 733.79,515.84 C735.05,515.93 738.30,518.07 741.01,520.61 C750.30,529.30 752.68,540.85 752.11,574.50 C751.45,614.09 751.48,627.81 752.22,628.55 C754.09,630.42 766.01,619.53 776.94,606.00 C781.16,600.78 788.28,591.33 792.78,585.00 C815.71,552.74 833.19,539.65 851.18,541.28 C866.36,542.66 882.48,556.11 892.29,575.58 C896.44,583.83 899.24,592.94 905.47,618.50 C910.47,639.04 914.98,650.66 921.86,660.80 C936.24,681.97 934.03,691.65 912.56,701.57 C904.48,705.30 896.58,706.85 859.50,712.00 C833.65,715.59 818.90,718.48 795.00,724.63 C773.02,730.28 737.32,740.23 725.50,743.99 C720.55,745.56 709.53,748.95 701.00,751.52 C682.50,757.10 648.23,768.07 600.50,783.71 C565.14,795.29 547.57,801.23 503.00,816.70 C426.03,843.41 368.37,862.91 354.00,867.10 C348.23,868.79 340.46,871.70 336.75,873.58 C328.96,877.53 329.15,877.49 326.22,875.44 ZM 353.45 761.75 C360.29,738.01 367.58,700.90 368.69,684.28 L 369.30 675.05 L 366.40 675.89 C364.80,676.36 356.08,679.01 347.00,681.80 C337.92,684.59 326.00,687.82 320.50,688.98 C304.66,692.34 297.70,693.97 297.22,694.44 C296.98,694.68 302.83,700.87 310.21,708.19 C324.66,722.52 330.39,730.33 340.48,749.50 C347.93,763.64 349.96,767.00 351.05,767.00 C351.54,767.00 352.62,764.64 353.45,761.75 ZM 480.34 544.56 C480.64,543.76 480.45,541.63 479.91,539.81 C478.54,535.20 471.40,492.12 469.49,477.00 C466.97,456.96 466.04,453.00 463.88,453.00 C459.79,453.00 448.76,473.01 444.86,487.50 C441.73,499.11 441.70,515.61 444.80,522.42 C449.37,532.48 457.59,539.49 470.06,543.97 C476.60,546.32 479.60,546.49 480.34,544.56 ZM 645.13 452.53 C637.84,449.82 632.95,445.56 630.03,439.35 C627.35,433.65 627.34,426.66 630.00,424.00 C632.76,421.24 636.67,421.49 645.50,425.00 C650.25,426.89 654.86,428.00 657.92,428.00 C674.45,428.00 695.78,413.24 718.25,386.24 C738.13,362.35 752.43,341.63 760.01,325.76 C770.70,303.35 767.47,298.92 741.50,300.34 C727.30,301.11 723.94,301.76 690.59,310.12 C648.27,320.74 605.72,333.16 558.86,348.58 C542.11,354.09 528.57,358.00 526.24,358.00 C518.32,358.00 514.16,351.01 519.25,346.24 C525.60,340.29 605.37,310.86 665.00,292.47 C716.27,276.67 747.94,271.21 763.87,275.45 C786.14,281.38 798.36,299.20 792.47,317.15 C789.97,324.78 776.92,350.37 771.82,357.68 C769.44,361.08 759.41,374.57 749.51,387.66 C723.63,421.93 707.43,437.63 687.64,447.66 C673.02,455.07 656.93,456.91 645.13,452.53 Z"/>
-      </g>
+  <div id="loader-wrapper">
+    <svg class="text-svg" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+      <path
+        d="M0 0 C1.16578331 -0.00855011 1.16578331 -0.00855011 2.3551178 -0.01727295 C3.99820615 -0.02668581 5.64131306 -0.03324209 7.28442383 -0.03710938 C9.74661233 -0.04672448 12.20793202 -0.0777445 14.66992188 -0.109375 C24.79484726 -0.17742554 34.01289654 0.71670189 43.84765625 3.203125 C44.61585693 3.39664551 45.38405762 3.59016602 46.17553711 3.78955078 C60.35075699 7.68064406 72.79289453 14.59117226 83.84765625 24.203125 C84.74484375 24.88568359 84.74484375 24.88568359 85.66015625 25.58203125 C102.83528647 38.90070862 112.94543053 62.07077256 115.63232422 83.17333984 C119.41103147 118.7925826 101.95569444 151.63386717 80.22021484 178.55322266 C75.98767844 183.64099942 71.43429704 188.43602621 66.84765625 193.203125 C66.37682617 193.69586914 65.90599609 194.18861328 65.42089844 194.69628906 C51.30068593 209.41020357 34.61706917 222.17228279 16.84765625 232.203125 C16.05423828 232.65300781 15.26082031 233.10289062 14.44335938 233.56640625 C-5.62433362 244.80906057 -26.47919841 253.09928569 -49.15234375 257.203125 C-50.21453125 257.42613281 -51.27671875 257.64914062 -52.37109375 257.87890625 C-75.54394344 262.26860845 -97.36912512 258.07565664 -119.15234375 250.203125 C-122.19133767 256.69767275 -124.10166521 263.45092077 -126.08984375 270.328125 C-126.76492522 272.64343332 -127.44070508 274.95853812 -128.1171875 277.2734375 C-128.45202148 278.42054199 -128.78685547 279.56764648 -129.13183594 280.74951172 C-130.45984489 285.2437736 -131.84040102 289.72091913 -133.22583008 294.19775391 C-134.28142305 297.62182491 -135.30953876 301.05343608 -136.33105469 304.48779297 C-139.48774119 315.09789002 -142.75019895 325.66921144 -146.15234375 336.203125 C-146.49749023 337.27788086 -146.84263672 338.35263672 -147.19824219 339.45996094 C-158.15557933 373.44563797 -169.9962988 408.84182365 -189.15234375 439.203125 C-189.78269531 440.20472656 -190.41304687 441.20632813 -191.0625 442.23828125 C-212.83099462 475.77820834 -212.83099462 475.77820834 -231.15234375 480.203125 C-238.60761963 481.0448497 -245.11778294 479.16948781 -251.203125 474.6953125 C-258.10049262 468.34441726 -260.9923832 460.18414134 -261.390625 450.96484375 C-261.89074995 428.4906188 -257.10564344 407.46347589 -250.15234375 386.203125 C-249.80993652 385.14738281 -249.4675293 384.09164063 -249.11474609 383.00390625 C-236.8981974 345.87180908 -219.81047584 309.39751708 -199.15234375 276.203125 C-198.63881348 275.37329102 -198.1252832 274.54345703 -197.59619141 273.68847656 C-187.01889901 256.6549949 -176.13903488 239.52903379 -163.15234375 224.203125 C-166.48335968 220.77555789 -169.91725419 217.68280319 -173.65234375 214.703125 C-184.44194202 206.09569267 -193.50006313 195.41346426 -202.13671875 184.6953125 C-204.74334278 181.47239364 -207.43777802 178.33531623 -210.15234375 175.203125 C-217.19656801 178.29571126 -222.06915629 185.04820144 -227 190.76171875 C-235.11939726 199.97156138 -243.65232709 208.78618107 -252.3840332 217.41333008 C-255.34982797 220.35551653 -258.20568585 223.32005381 -260.90234375 226.515625 C-264.08012607 230.26256236 -267.66521009 233.41349997 -271.3515625 236.65234375 C-274.54800448 239.56346873 -277.56421316 242.61691052 -280.58984375 245.703125 C-285.30938516 250.49442552 -290.19715082 254.84812785 -295.4765625 259.02734375 C-298.29101033 261.31588016 -300.93561611 263.73116192 -303.58984375 266.203125 C-308.61163272 270.80761038 -313.85965013 274.92313123 -319.37841797 278.91357422 C-321.35659159 280.35160244 -323.31867368 281.81029486 -325.28125 283.26953125 C-335.56415913 290.86639446 -346.12074314 297.74761427 -357.15234375 304.203125 C-358.16893066 304.80616455 -358.16893066 304.80616455 -359.20605469 305.42138672 C-381.35448398 318.52776569 -404.91550653 327.23061258 -430.15234375 332.203125 C-430.90765381 332.379646 -431.66296387 332.55616699 -432.44116211 332.73803711 C-437.74658711 333.64815279 -443.17133283 333.38903441 -448.54223633 333.38842773 C-450.68396503 333.39059377 -452.82516051 333.40871627 -454.96679688 333.42773438 C-467.01464107 333.47984526 -478.03428878 331.96519141 -489.46484375 328.078125 C-490.36855713 327.77100586 -491.27227051 327.46388672 -492.20336914 327.14746094 C-514.90888937 319.16761501 -535.2902655 303.70933245 -548.15234375 283.203125 C-548.91611328 282.05650391 -548.91611328 282.05650391 -549.6953125 280.88671875 C-565.78266316 255.78383482 -568.83185238 223.82690846 -563.04785156 195.07104492 C-555.47999338 160.93750276 -537.91971794 129.32301264 -516.15234375 102.203125 C-515.69069824 101.62578613 -515.22905273 101.04844727 -514.75341797 100.45361328 C-503.13789103 86.08047269 -489.94360478 72.31770115 -475.15234375 61.203125 C-474.05336685 60.35158646 -472.95440975 59.50002237 -471.85546875 58.6484375 C-452.28754761 43.69622318 -431.13373413 32.16160084 -407.15234375 26.203125 C-405.97414063 25.84863281 -404.7959375 25.49414062 -403.58203125 25.12890625 C-390.8051924 21.96781491 -373.38875482 21.99072335 -361.421875 27.76953125 C-357.24386143 30.40865514 -354.90808015 33.0695204 -352.15234375 37.203125 C-352.15234375 38.193125 -352.15234375 39.183125 -352.15234375 40.203125 C-355.73706629 39.59608642 -358.75790666 38.57299857 -362.08984375 37.140625 C-378.65751931 31.10193952 -396.6929071 37.54859028 -411.91162109 44.57861328 C-419.43185552 48.19363386 -426.37486374 52.34888209 -433.15234375 57.203125 C-433.79655273 57.66090332 -434.44076172 58.11868164 -435.10449219 58.59033203 C-443.38222125 64.51629843 -451.15528678 70.76672326 -458.5546875 77.7578125 C-460.7235761 79.79950312 -462.93139245 81.73082936 -465.21484375 83.640625 C-498.17851997 112.46688507 -523.13589451 158.14534659 -530.15234375 201.203125 C-530.33667969 202.30398438 -530.52101563 203.40484375 -530.7109375 204.5390625 C-533.52241432 227.87680812 -529.40595792 251.1653585 -514.85546875 269.9765625 C-501.26464408 286.65441774 -482.40346102 296.02170424 -461.15234375 298.203125 C-413.62020575 302.23604479 -367.67917455 275.00222595 -330.99462891 247.57080078 C-328.55590066 245.76033754 -326.07082269 244.01756066 -323.58984375 242.265625 C-312.18099175 233.94119382 -301.44125914 224.7115979 -291.1796875 215.01953125 C-289.02775178 212.98970637 -286.81608235 211.05346726 -284.56640625 209.1328125 C-279.22249217 204.48060562 -274.24980892 199.45016297 -269.25219727 194.43334961 C-267.59307055 192.76886223 -265.92866324 191.10979053 -264.26367188 189.45117188 C-259.20224057 184.39257584 -254.23601869 179.30047516 -249.58618164 173.85522461 C-247.55699466 171.51715066 -245.36952482 169.3619592 -243.15234375 167.203125 C-240.05623754 164.12595522 -236.9800345 161.04380845 -234.02734375 157.828125 C-233.18816406 156.91933594 -233.18816406 156.91933594 -232.33203125 155.9921875 C-230.78535266 154.00372739 -230.78535266 154.00372739 -231.15234375 150.203125 C-232.85476829 147.89757274 -234.55405938 145.82260167 -236.46484375 143.703125 C-237.27864502 142.77935059 -237.27864502 142.77935059 -238.10888672 141.83691406 C-239.77904205 139.94882798 -241.46367828 138.07465864 -243.15234375 136.203125 C-243.88831787 135.38038086 -243.88831787 135.38038086 -244.63916016 134.54101562 C-265.34191551 111.41827118 -290.71839696 87.46298361 -323.15234375 84.203125 C-355.44256933 82.81373377 -380.68649024 89.74382799 -405.15234375 111.203125 C-405.98121094 111.88761719 -406.81007813 112.57210937 -407.6640625 113.27734375 C-422.09923215 125.53704043 -436.16434022 144.15818879 -438.40673828 163.38427734 C-438.94069983 171.05223302 -438.71287767 178.27572625 -435.76171875 185.47265625 C-434.87476926 187.99136537 -435.18771006 189.75443949 -436.15234375 192.203125 C-438.15234375 194.203125 -438.15234375 194.203125 -440.90234375 194.265625 C-445.52014254 192.75596001 -447.69893619 190.23327263 -450.15234375 186.203125 C-458.87062891 167.52689175 -459.81867071 147.76639824 -453.15234375 128.203125 C-451.71587702 124.38905816 -450.05928465 120.80334396 -448.15234375 117.203125 C-447.66121094 116.25179687 -447.17007813 115.30046875 -446.6640625 114.3203125 C-442.13874875 106.04730455 -436.47308994 99.1349065 -430.15234375 92.203125 C-428.94578125 90.87087891 -428.94578125 90.87087891 -427.71484375 89.51171875 C-408.25742021 69.06222263 -378.39040766 53.98910048 -349.9921875 52.96484375 C-330.47554563 52.59644867 -311.882199 54.56502842 -294.15234375 63.203125 C-293.11835449 63.70054199 -293.11835449 63.70054199 -292.06347656 64.20800781 C-279.05069818 70.55442767 -268.09533228 78.25738876 -257.43359375 88.109375 C-255.46654052 89.91475262 -253.45539922 91.62304504 -251.40234375 93.328125 C-241.90920449 101.63222459 -233.59930368 111.33605137 -225.93896484 121.32299805 C-222.23197312 126.15574976 -218.28489449 130.7271818 -214.15234375 135.203125 C-211.01855796 132.07296488 -207.89032488 128.93733183 -204.7644043 125.79931641 C-200.62384372 121.64274461 -196.48107101 117.48838671 -192.33667278 113.33564186 C-189.84070694 110.83446324 -187.3456853 108.33235754 -184.8527832 105.828125 C-181.95936783 102.92165275 -179.06181142 100.01933927 -176.1640625 97.1171875 C-175.28046555 96.22842926 -174.39686859 95.33967102 -173.48649597 94.42398071 C-168.5366332 89.47367505 -163.4723679 84.75150805 -158.15234375 80.203125 C-156.54466002 78.74866983 -154.9399466 77.29091605 -153.33984375 75.828125 C-148.08977456 71.09826083 -142.67627599 66.60876117 -137.15234375 62.203125 C-136.22421875 61.45675781 -135.29609375 60.71039063 -134.33984375 59.94140625 C-98.87959992 32.0072298 -58.72414887 9.83257713 -14.15234375 1.203125 C-13.23364502 1.02281738 -12.31494629 0.84250977 -11.3684082 0.65673828 C-7.57066608 0.12108165 -3.82724977 0.02224149 0 0 Z "
+        transform="translate(742.15234375,270.796875)" />
+      <path
+        d="M0 0 C1.14662109 -0.01224609 2.29324219 -0.02449219 3.47460938 -0.03710938 C22.59559845 -0.06957285 41.59253117 5.05206705 55.6875 18.625 C57.05315829 20.1168744 58.38926074 21.63660134 59.6875 23.1875 C60.23792969 23.83847656 60.78835938 24.48945313 61.35546875 25.16015625 C71.21913936 38.32016922 73.505939 54.23821263 71.6875 70.1875 C69.73612786 82.88982806 64.93624235 94.05580719 58.6875 105.1875 C58.21699219 106.06277344 57.74648438 106.93804687 57.26171875 107.83984375 C55.8354036 110.36850276 54.30055238 112.77328635 52.6875 115.1875 C52.33896973 115.71649902 51.99043945 116.24549805 51.63134766 116.79052734 C39.30700832 135.18223374 21.93697904 152.62386075 3.6875 165.1875 C2.97126465 165.68862305 2.2550293 166.18974609 1.51708984 166.70605469 C-15.99656637 178.85749606 -34.51986955 189.15417506 -55.22363281 194.63378906 C-57.08261397 195.12656247 -58.92919862 195.66557566 -60.7734375 196.2109375 C-78.56531256 200.73148384 -102.06289843 201.00075082 -119.3125 194.1875 C-120.99731445 192.61450195 -120.99731445 192.61450195 -122.3125 191.1875 C-121.08827399 187.34552638 -119.86135868 183.50442256 -118.63208008 179.6640625 C-118.21534695 178.36090631 -117.79931499 177.05752566 -117.3840332 175.75390625 C-115.17835614 168.83163695 -112.91898657 161.96891128 -110.3125 155.1875 C-109.94769531 154.09566406 -109.58289063 153.00382813 -109.20703125 151.87890625 C-105.56321554 141.3420962 -99.75417827 135.0804648 -91.37890625 128 C-89.08490825 125.98787321 -86.95342914 123.8614795 -84.8125 121.6875 C-81.46330491 118.29822907 -78.02373635 115.10351213 -74.41015625 112 C-72.01332688 109.92899659 -69.66249818 107.81146782 -67.3125 105.6875 C-64.21180696 102.88733567 -61.09258058 100.11370377 -57.9375 97.375 C-57.30199219 96.81425781 -56.66648437 96.25351562 -56.01171875 95.67578125 C-54.6106907 94.44867392 -53.1836258 93.25136042 -51.75 92.0625 C-49.99683514 90.21441871 -49.99683514 90.21441871 -50.5625 87.4375 C-50.93375 86.32375 -50.93375 86.32375 -51.3125 85.1875 C-57.08652013 84.57267378 -60.17438733 86.44087975 -64.8125 89.5 C-65.50303467 89.94279297 -66.19356934 90.38558594 -66.9050293 90.84179688 C-73.05349171 94.85792169 -78.82510826 99.3073837 -84.51953125 103.9375 C-87.3125 106.1875 -87.3125 106.1875 -90.3125 108.1875 C-86.85707852 98.88957843 -81.05337545 91.47527236 -74.03515625 84.57421875 C-71.86111382 81.56211008 -71.86465771 79.82558963 -72.3125 76.1875 C-74.59363513 73.33608109 -76.32737544 73.18519174 -79.9375 72.625 C-85.64006056 72.86833746 -89.80539626 75.93786408 -94.3125 79.1875 C-95.03179688 79.69796875 -95.75109375 80.2084375 -96.4921875 80.734375 C-116.05406277 96.35521313 -129.03275292 125.11517223 -139.29296875 147.4453125 C-142.68316891 154.75537723 -146.37895075 161.02878622 -151.625 167.1875 C-152.1411084 167.79376221 -152.6572168 168.40002441 -153.18896484 169.0246582 C-154.49082717 170.48064906 -155.89516484 171.84365629 -157.3125 173.1875 C-160.91173873 173.1875 -161.30868927 172.61272032 -163.875 170.25 C-164.58140625 169.60675781 -165.2878125 168.96351563 -166.015625 168.30078125 C-166.77359375 167.60339844 -167.5315625 166.90601563 -168.3125 166.1875 C-169.09109375 165.50042969 -169.8696875 164.81335938 -170.671875 164.10546875 C-179.11606736 156.64284652 -187.23670735 148.82204768 -194.546875 140.234375 C-197.44397527 136.87578973 -200.47839932 133.64058836 -203.4921875 130.38671875 C-205.3125 128.1875 -205.3125 128.1875 -206.3125 125.1875 C-205.13145447 123.40174866 -205.13145447 123.40174866 -203.32397461 121.45727539 C-202.67290741 120.75095978 -202.02184021 120.04464417 -201.3510437 119.31692505 C-200.67832428 118.61421478 -200.00560486 117.91150452 -199.3125 117.1875 C-198.4323674 116.26745682 -198.4323674 116.26745682 -197.53445435 115.3288269 C-195.74867985 113.49286921 -193.94291269 111.67914753 -192.12890625 109.87109375 C-191.14010719 108.8808596 -191.14010719 108.8808596 -190.1313324 107.87062073 C-188.74853165 106.48714494 -187.36448924 105.10490917 -185.97924805 103.72387695 C-183.88019657 101.63018331 -181.7865406 99.53120126 -179.69335938 97.43164062 C-178.33886214 96.07780429 -176.98405469 94.72427825 -175.62890625 93.37109375 C-175.01406876 92.75423203 -174.39923126 92.1373703 -173.76576233 91.5018158 C-169.99539827 87.75134443 -166.10665789 84.1883955 -162.07879639 80.71568298 C-159.67130924 78.6327478 -157.33826133 76.47257345 -155 74.3125 C-113.13525273 36.26919423 -58.43095927 0.03251584 0 0 Z "
+        transform="translate(752.3125,302.8125)" />
+      <path
+        d="M0 0 C1.29368934 3.88106801 0.40022402 5.05272899 -1.16015625 8.78125 C-4.01993276 15.91242898 -6.27458795 23.13192227 -8.4375 30.5 C-8.82936738 31.8197759 -9.22162546 33.13943585 -9.61425781 34.45898438 C-12.14083663 42.97294103 -14.56812634 51.51367003 -16.97021484 60.06347656 C-18.66695174 66.02639658 -20.65664871 71.80703229 -22.8125 77.62109375 C-24.05413537 81.15403651 -25.06389268 84.7035625 -26.0625 88.3125 C-28.5700644 97.21723956 -31.7629191 105.87958501 -34.9375 114.5625 C-35.19048859 115.25461578 -35.44347717 115.94673157 -35.70413208 116.65982056 C-37.20464718 120.75759795 -38.71616545 124.85120132 -40.23571777 128.94195557 C-40.75116264 130.32993556 -41.26570995 131.71824916 -41.77941895 133.10687256 C-44.81456126 141.30819943 -47.90443044 149.47054294 -51.375 157.5 C-51.9484314 158.82898315 -51.9484314 158.82898315 -52.53344727 160.18481445 C-56.06329743 168.28107546 -59.87222119 176.19286925 -64 184 C-64.58201172 185.10819092 -64.58201172 185.10819092 -65.17578125 186.23876953 C-79.11600041 212.60901745 -79.11600041 212.60901745 -85.2578125 214.80859375 C-86.12019531 214.90333984 -86.12019531 214.90333984 -87 215 C-91.35009287 201.94972139 -89.00536519 188.07539704 -86 175 C-85.81195801 174.14470703 -85.62391602 173.28941406 -85.43017578 172.40820312 C-78.57276625 141.48712339 -66.83347944 111.16825812 -52.11035156 83.13525391 C-50.8384055 80.68924682 -49.60313545 78.22610532 -48.3671875 75.76171875 C-38.13766074 55.53918608 -26.11079938 36.47049811 -13 18 C-12.54189941 17.35256836 -12.08379883 16.70513672 -11.61181641 16.03808594 C-3.90142648 5.15188369 -3.90142648 5.15188369 0 0 Z "
+        transform="translate(590,507)" />
     </svg>
   </div>
-  <main class="page">
+  <main class="page" id="main-content">
     <header class="topbar">
       <a class="brand" href="#top">
-        <span class="brand-mark" aria-hidden="true"></span>
+        <img src="cursor.png" class="brand-mark" alt="" aria-hidden="true">
         <span id="brandName">One-Click Portfolio</span>
       </a>
       <nav class="topnav" aria-label="Primary">
-        <a class="chip" href="#landing">How it Works</a>
-        <a class="chip" href="#import-data">Import</a>
+        <a class="chip" href="#how-it-works">How it Works</a>
         <a class="chip" href="#theme-step">Themes</a>
-        <a class="chip" href="#deployment">Deployment</a>
-        <a class="chip" href="https://github.com/a0n0d8h/imarinzone.github.io" target="_blank" rel="noopener">GitHub Repository</a>
+        <a class="chip" href="https://github.com/oneclick-portfolio/oneclick-portfolio.github.io" target="_blank"
+          rel="noopener">GitHub
+          Repository</a>
+        <button class="chip disconnect-btn" id="topbarDisconnectBtn" type="button" hidden style="color: var(--error); cursor: pointer; border-color: var(--error); background: transparent;">Disconnect</button>
       </nav>
-      <button class="btn btn-primary" id="heroStartBtn" type="button">Get Started</button>
+
     </header>
 
     <section id="landing" class="headline" aria-label="Landing Page">
       <div>
-        <span class="eyebrow">Portfolio OS</span>
-        <h1 id="heroName">Build and deploy your portfolio in one click</h1>
+        <h1 id="heroName">Build and deploy your portfolio in one <span class="cursor-target">click<img src="cursor.png"
+              class="pixel-cursor" alt=""></span></h1>
         <p id="heroSub">Import your rxresu.me JSON, pick a theme, and publish to GitHub Pages.</p>
         <div class="hero-actions">
-          <button class="btn btn-primary" id="heroConnectBtn" type="button">Get Started</button>
-          <a class="btn" href="https://github.com/a0n0d8h/imarinzone.github.io/fork" target="_blank" rel="noopener">Fork on GitHub</a>
+
+          <a class="btn" href="https://github.com/oneclick-portfolio/oneclick-portfolio.github.io" target="_blank"
+            rel="noopener">
+            GitHub</a>
         </div>
       </div>
-      <article class="terminal-card" aria-label="Deployment terminal preview">
-        <div class="terminal-top">deploy-log</div>
-        <pre class="terminal-lines" id="terminalLog">Deploying resume repo...
-      Creating static site
-      Pushing theme files
-      Configuring GitHub Pages
-      Deployment complete</pre>
-      </article>
+
+    </section>
+
+    <section id="how-it-works" class="step-section">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-sub">Get your developer portfolio live in three simple steps.</p>
+      <div class="cards-3">
+        <article class="panel">
+          <span class="tag">Step 1</span>
+          <h3 style="margin-top: 12px;">Export Data</h3>
+          <p>Create your resume on <a href="https://rxresu.me" target="_blank"
+              style="text-decoration: underline;">rxresu.me</a> and download the <strong>JSON</strong> file. This
+            standard format keeps your data portable and easy to manage.</p>
+        </article>
+        <article class="panel">
+          <span class="tag" style="background: #eef2ff; color: #3730a3;">Step 2</span>
+          <h3 style="margin-top: 12px;">Connect GitHub</h3>
+          <p>Authorize the One Click Portfolio Bot with your Github account. We use scoped permissions to create a new
+            repository and set up GitHub Pages automatically.</p>
+        </article>
+        <article class="panel">
+          <span class="tag" style="background: #ecfdf5; color: #065f46;">Step 3</span>
+          <h3 style="margin-top: 12px;">One-Click Deploy</h3>
+          <p>Pick a theme that fits your style, name your repository, and click deploy. Your portfolio will be live at
+            `username.github.io/repo` in seconds.</p>
+        </article>
+      </div>
     </section>
 
     <section id="auth" class="step-section">
       <h2 class="section-title">Step 1: Connect GitHub</h2>
       <p class="section-sub">Connect GitHub to create a repository and deploy your portfolio.</p>
       <article class="panel auth-panel">
-        <h3 id="authStatusTitle">Authorize access</h3>
-        <ul>
-          <li>Create a new public portfolio repository.</li>
-          <li>Push your selected theme and resume data.</li>
-          <li>Use scoped access for deployment only.</li>
-        </ul>
-        <a class="btn btn-primary" id="ghConnectBtn" href="#">Authorize GitHub</a>
-        <button class="btn btn-ghost" id="ghDisconnectBtn" type="button" hidden>Disconnect</button>
+        <h3 id="authStatusTitle">Authorize your Github Account</h3>
+        <a class="btn btn-primary" id="ghConnectBtn" href="#">Connect GitHub</a>
+        <button class="btn btn-ghost disconnect-btn" id="ghDisconnectBtn" type="button" hidden>Disconnect</button>
         <p class="auth-note" id="ghStatus">GitHub App not connected</p>
         <ul class="mini-list" style="margin-top: 10px;">
           <li>Tip: choose <strong>All repositories</strong> during app install for the easiest setup.</li>
@@ -614,13 +751,16 @@
         <article class="panel">
           <h3>How to Export from rxresu.me</h3>
           <p>Export your resume JSON from the editor, then upload it here.</p>
-          <a class="btn" href="https://rxresu.me/editor" target="_blank" rel="noopener">Open rxresu.me Editor</a>
+          <a class="btn" href="https://rxresu.me" target="_blank" rel="noopener">Open rxresu.me Editor</a>
           <ul class="mini-list" style="margin-top: 10px;">
             <li>Go to your resume in the rxresu.me editor.</li>
             <li>Use the export/download action for JSON format.</li>
             <li>Upload that downloaded file above and validate it.</li>
           </ul>
         </article>
+      </div>
+      <div style="margin-top: 32px; text-align: center;">
+        <button class="btn btn-ghost disconnect-btn" type="button" style="color: var(--error); font-size: 13px;">Disconnect GitHub</button>
       </div>
     </section>
 
@@ -688,7 +828,7 @@
           </div>
         </article>
       </div>
-      <div style="margin-top: 14px;">
+      <div style="margin-top: 24px; text-align: center;">
         <button class="btn btn-primary" id="themeContinueBtn" type="button">Continue to Deployment</button>
       </div>
     </section>
@@ -701,13 +841,15 @@
           <span class="eyebrow">Deployment</span>
           <h3>Publish in one click</h3>
           <p>Create a repository and publish your site automatically.</p>
-          <input class="url-field" id="repositoryName" type="text" value="portfolio-modern" aria-label="Repository name" />
+          <input class="url-field" id="repositoryName" type="text" value="portfolio-modern"
+            aria-label="Repository name" />
           <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
             <button class="btn btn-primary" id="deployButton" type="button">Deploy Selected Theme</button>
             <button class="btn" id="copyLinkBtn" type="button" disabled>Copy Link</button>
           </div>
           <p class="status-line" id="deployStatusLine">Waiting for authorization.</p>
-          <p class="auth-note" style="margin-top: 6px;">If deployment fails, check your GitHub App repository permissions.</p>
+          <p class="auth-note" style="margin-top: 6px;">If deployment fails, check your GitHub App repository
+            permissions.</p>
           <div class="deploy-result" id="deployResult" hidden>
             Live URL: <a id="deployPagesUrl" href="#" target="_blank" rel="noopener">Open live site</a>
           </div>
@@ -725,9 +867,11 @@
             <li>Deploys static files for fast loading.</li>
             <li>Themes are lightweight and easy to edit.</li>
           </ul>
-          <div style="margin-top: 14px; border: 1px solid #111; border-radius: 12px; padding: 12px; background: #fafafa;">
+          <div
+            style="margin-top: 14px; border: 1px solid #111; border-radius: 12px; padding: 12px; background: #fafafa;">
             <strong id="footerName">One-Click Portfolio</strong>
-            <p style="margin: 8px 0 0; font-size: 12px; color: #555;">Open source portfolio deployment for GitHub Pages.</p>
+            <p style="margin: 8px 0 0; font-size: 12px; color: #555;">Open source portfolio deployment for GitHub Pages.
+            </p>
           </div>
         </article>
       </div>
@@ -744,16 +888,18 @@
   <script>
     window.addEventListener('load', function () {
       const loader = document.getElementById('loader-wrapper');
+      const content = document.getElementById('main-content');
       if (!loader) return;
 
       window.setTimeout(function () {
         loader.classList.add('fade-out');
+        if (content) content.classList.add('fade-in');
         document.body.classList.remove('is-loading');
 
-        window.setTimeout(function () {
-          loader.remove();
+        window.setTimeout(() => {
+          loader.style.display = 'none';
         }, 800);
-      }, 4500);
+      }, 1500);
     });
   </script>
 
@@ -764,7 +910,7 @@
       const REPO_URL = 'https://github.com/oneclick-portfolio/op.github.io';
       const ghStatus = document.getElementById('ghStatus');
       const ghConnectBtn = document.getElementById('ghConnectBtn');
-      const heroConnectBtn = document.getElementById('heroConnectBtn');
+
       const ghDisconnectBtn = document.getElementById('ghDisconnectBtn');
       const deployButton = document.getElementById('deployButton');
       const deployStatusLine = document.getElementById('deployStatusLine');
@@ -775,7 +921,8 @@
       const viewRepoLink = document.getElementById('viewRepoLink');
       const manageSiteLink = document.getElementById('manageSiteLink');
       const authStatusTitle = document.getElementById('authStatusTitle');
-      const heroStartBtn = document.getElementById('heroStartBtn');
+      const topbarDisconnectBtn = document.getElementById('topbarDisconnectBtn');
+
       const resumeJsonFileInput = document.getElementById('resumeJsonFile');
       const validateResumeBtn = document.getElementById('validateResumeBtn');
       const resumeUploadStatus = document.getElementById('resumeUploadStatus');
@@ -786,9 +933,13 @@
       const themeSection = document.getElementById('theme-step');
       const deploymentSection = document.getElementById('deployment');
 
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
       const stepSections = [authSection, importSection, themeSection, deploymentSection];
       let currentStep = 1;
       let isAuthed = false;
+      let isInitialized = false;
       let validatedResumeData = null;
 
       viewRepoLink.href = REPO_URL;
@@ -862,8 +1013,6 @@
 
       function setConnectTargets(url, label) {
         ghConnectBtn.href = url;
-        heroConnectBtn.setAttribute('data-href', url);
-        heroConnectBtn.textContent = label;
       }
 
       function setStep(stepNumber) {
@@ -871,7 +1020,9 @@
         stepSections.forEach((section, index) => {
           section.hidden = (index + 1) !== currentStep;
         });
-        stepSections[currentStep - 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (isInitialized) {
+          stepSections[currentStep - 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
         setDeployEnabled(isAuthed && currentStep === 4);
       }
 
@@ -928,14 +1079,9 @@
         setStep(4);
       });
 
-      heroStartBtn.addEventListener('click', () => {
-        setStep(1);
-      });
 
-      heroConnectBtn.addEventListener('click', () => {
-        const href = heroConnectBtn.getAttribute('data-href') || authStartUrl();
-        window.location.href = href;
-      });
+
+
 
       copyLinkBtn.addEventListener('click', async () => {
         if (!deployPagesUrl.href || deployPagesUrl.href === '#') return;
@@ -951,14 +1097,17 @@
       });
 
       async function updateAuthStatus() {
+            ghDisconnectBtn.hidden = true;
+            if (topbarDisconnectBtn) topbarDisconnectBtn.hidden = true;
         try {
           const response = await fetch(apiUrl('/api/github/me'), { credentials: 'include' });
           if (!response.ok) {
             isAuthed = false;
             setStatus('GitHub App not connected');
-            authStatusTitle.textContent = 'Authorize access';
+            authStatusTitle.textContent = 'Connect your Github Account';
             ghConnectBtn.hidden = false;
-            ghDisconnectBtn.hidden = true;
+                ghDisconnectBtn.hidden = true;
+            if (topbarDisconnectBtn) topbarDisconnectBtn.hidden = true;
             setConnectTargets(authStartUrl(), 'Authorize GitHub');
             setStep(1);
             return null;
@@ -971,7 +1120,8 @@
             isAuthed = false;
             setStatus('GitHub App not connected');
             ghConnectBtn.hidden = false;
-            ghDisconnectBtn.hidden = true;
+                ghDisconnectBtn.hidden = true;
+            if (topbarDisconnectBtn) topbarDisconnectBtn.hidden = true;
             setConnectTargets(authStartUrl(), 'Authorize GitHub');
             setStep(1);
             return null;
@@ -983,7 +1133,8 @@
             setStatus(installUrl ? 'Install GitHub App to continue' : 'GitHub App installation required');
             authStatusTitle.textContent = 'Install GitHub App';
             ghConnectBtn.hidden = false;
-            ghDisconnectBtn.hidden = false;
+                ghDisconnectBtn.hidden = true;
+            if (topbarDisconnectBtn) topbarDisconnectBtn.hidden = true;
             setConnectTargets(installUrl || authStartUrl(), installUrl ? 'Install GitHub App' : 'Authorize GitHub');
             setStep(1);
             return payload.user;
@@ -999,6 +1150,7 @@
           authStatusTitle.textContent = 'Connected';
           ghConnectBtn.hidden = true;
           ghDisconnectBtn.hidden = false;
+          if (topbarDisconnectBtn) topbarDisconnectBtn.hidden = false;
           setConnectTargets(authStartUrl(), 'Connected');
           if (currentStep === 1) setStep(2);
           setDeployEnabled(currentStep === 4);
@@ -1008,6 +1160,7 @@
           console.error(error);
           setStatus('GitHub App status unavailable');
           setConnectTargets(authStartUrl(), 'Authorize GitHub');
+          ghDisconnectBtn.hidden = true;
           setStep(1);
           return null;
         }
@@ -1075,14 +1228,16 @@
 
       deployButton.addEventListener('click', deploySelectedTheme);
 
-      ghDisconnectBtn.addEventListener('click', async () => {
-        try {
-          await fetch(apiUrl('/api/github/logout'), { method: 'POST', credentials: 'include' });
-        } finally {
-          await updateAuthStatus();
-          hideDeployResult();
-          setStep(1);
-        }
+      document.querySelectorAll('.disconnect-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            await fetch(apiUrl('/api/github/logout'), { method: 'POST', credentials: 'include' });
+          } finally {
+            await updateAuthStatus();
+            hideDeployResult();
+            setStep(1);
+          }
+        });
       });
 
       if (window.location.search.indexOf('connected=1') !== -1) {
@@ -1094,7 +1249,9 @@
       hideDeployResult();
       setStep(1);
       await updateAuthStatus();
+      isInitialized = true;
     })();
   </script>
 </body>
+
 </html>
