@@ -739,13 +739,21 @@
 
     <section id="import-data" class="step-section" hidden>
       <h2 class="section-title">Step 2: Import Data</h2>
-      <p class="section-sub">Upload your rxresu.me JSON file and validate it.</p>
-      <div class="cards-2">
+      <p class="section-sub">Upload your PDF or rxresu.me JSON file to get started.</p>
+      <div class="cards-3">
+        <article class="panel">
+          <span class="tag" style="background: #e0f2fe; color: #0369a1; margin-bottom: 12px;">AI Beta</span>
+          <h3 style="margin-top: 8px;">AI Resume Parser</h3>
+          <p>Upload your PDF resume and let Gemini structure it for you automatically.</p>
+          <input class="field" id="resumePdfFile" type="file" accept="application/pdf" />
+          <button class="btn btn-primary" id="parsePdfBtn" type="button" style="width: 100%;">Parse with AI</button>
+          <p class="upload-status" id="pdfParseStatus">No PDF parsed yet.</p>
+        </article>
         <article class="panel">
           <h3>rxresu.me JSON</h3>
           <p>Upload your exported resume JSON. We validate it against the official schema.</p>
           <input class="field" id="resumeJsonFile" type="file" accept="application/json" />
-          <button class="btn btn-primary" id="validateResumeBtn" type="button">Validate and Continue</button>
+          <button class="btn" id="validateResumeBtn" type="button" style="width: 100%;">Validate and Continue</button>
           <p class="upload-status" id="resumeUploadStatus">No JSON validated yet.</p>
         </article>
         <article class="panel">
@@ -926,6 +934,11 @@
       const resumeJsonFileInput = document.getElementById('resumeJsonFile');
       const validateResumeBtn = document.getElementById('validateResumeBtn');
       const resumeUploadStatus = document.getElementById('resumeUploadStatus');
+
+      const resumePdfFileInput = document.getElementById('resumePdfFile');
+      const parsePdfBtn = document.getElementById('parsePdfBtn');
+      const pdfParseStatus = document.getElementById('pdfParseStatus');
+
       const themeContinueBtn = document.getElementById('themeContinueBtn');
       const themeInputs = Array.from(document.querySelectorAll('input[name="theme"]'));
       const authSection = document.getElementById('auth');
@@ -971,6 +984,11 @@
       function setResumeStatus(text, isError) {
         resumeUploadStatus.textContent = text;
         resumeUploadStatus.style.color = isError ? '#a82020' : '#2f5c57';
+      }
+
+      function setPdfStatus(text, isError) {
+        pdfParseStatus.textContent = text;
+        pdfParseStatus.style.color = isError ? '#a82020' : '#2f5c57';
       }
 
       function selectedTheme() {
@@ -1035,6 +1053,11 @@
         setResumeStatus('File selected. Validate to continue.', false);
       });
 
+      resumePdfFileInput.addEventListener('change', () => {
+        validatedResumeData = null;
+        setPdfStatus('PDF selected. Parse with AI to continue.', false);
+      });
+
       validateResumeBtn.addEventListener('click', async () => {
         const file = resumeJsonFileInput.files && resumeJsonFileInput.files[0];
         if (!file) {
@@ -1071,7 +1094,49 @@
           validatedResumeData = null;
           setResumeStatus('Validation failed: ' + error.message, true);
         } finally {
-          validateResumeBtn.disabled = false;
+      validateResumeBtn.disabled = false;
+        }
+      });
+
+      parsePdfBtn.addEventListener('click', async () => {
+        const file = resumePdfFileInput.files && resumePdfFileInput.files[0];
+        if (!file) {
+          window.alert('Please choose a PDF file first.');
+          return;
+        }
+
+        parsePdfBtn.disabled = true;
+        setPdfStatus('AI is parsing your resume... This may take a few seconds.', false);
+
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const response = await fetch(apiUrl('/api/resume/parse'), {
+            method: 'POST',
+            credentials: 'include',
+            body: formData
+          });
+
+          const payload = await response.json();
+          if (!response.ok) {
+            throw new Error(getApiErrorMessage(payload, 'PDF parsing failed.'));
+          }
+
+          validatedResumeData = payload.resumeData;
+          
+          if (payload.validationWarnings && payload.validationWarnings.length > 0) {
+            setPdfStatus('Parsed with some schema warnings: ' + payload.validationWarnings.slice(0, 2).join(', '), false);
+          } else {
+            setPdfStatus('Resume parsed and validated successfully.', false);
+          }
+          
+          window.setTimeout(() => setStep(3), 800);
+        } catch (error) {
+          validatedResumeData = null;
+          setPdfStatus('Parsing failed: ' + error.message, true);
+        } finally {
+          parsePdfBtn.disabled = false;
         }
       });
 
