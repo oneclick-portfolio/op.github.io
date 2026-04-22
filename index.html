@@ -166,6 +166,7 @@
       display: inline-block;
       image-rendering: pixelated;
       mix-blend-mode: multiply;
+      animation: cursor-float 1.5s ease-in-out infinite;
     }
 
     .topnav {
@@ -854,6 +855,104 @@
       }
     }
 
+    .cookie-warning-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, var(--error), #d32f2f);
+      color: white;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      z-index: 9998;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .cookie-warning-banner.hidden {
+      display: none;
+    }
+
+    .cookie-warning-content {
+      flex: 1;
+    }
+
+    .cookie-warning-banner h3 {
+      margin: 0 0 4px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .cookie-warning-banner p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.4;
+      opacity: 0.95;
+    }
+
+    .cookie-warning-actions {
+      display: flex;
+      gap: 12px;
+      flex-shrink: 0;
+      align-items: center;
+    }
+
+    .cookie-warning-banner .btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      background: white;
+      color: var(--error);
+      border: none;
+      font-weight: 600;
+      white-space: nowrap;
+      min-height: auto;
+    }
+
+    .cookie-warning-banner .btn:hover {
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .cookie-warning-banner .btn-dismiss {
+      background: transparent;
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 6px 12px;
+    }
+
+    .cookie-warning-banner .btn-dismiss:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    @media (max-width: 760px) {
+      .cookie-warning-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .cookie-warning-actions {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+    }
+
     .cursor-target {
       position: relative;
       display: inline-block;
@@ -1132,6 +1231,16 @@
 </head>
 
 <body class="is-loading">
+  <div id="cookie-warning-banner" class="cookie-warning-banner" hidden role="alert" aria-live="assertive">
+    <div class="cookie-warning-content">
+      <h3 id="cookie-warning-title">Third-party cookies are blocked</h3>
+      <p id="cookie-warning-text">Your browser is blocking cross-site cookies. Enable them for this site to complete authentication.</p>
+    </div>
+    <div class="cookie-warning-actions">
+      <button class="btn" id="cookie-warning-reload" type="button">Reload</button>
+      <button class="btn btn-dismiss" id="cookie-warning-dismiss" type="button" aria-label="Dismiss notification">✕</button>
+    </div>
+  </div>
   <div id="loader-wrapper">
     <svg class="text-svg" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
       <path
@@ -1152,8 +1261,8 @@
         <span id="brandName">One-Click Portfolio</span>
       </a>
       <nav class="topnav" aria-label="Primary">
-        <a class="chip" href="#how-it-works">How it Works</a>
-        <a class="chip" href="#theme-showcase">Themes</a>
+        <button class="chip" id="topbarHowItWorksBtn" type="button" style="cursor: pointer;">How it Works</button>
+        <button class="chip" id="topbarThemesBtn" type="button" style="cursor: pointer;">Themes</button>
         <button class="chip" id="topbarGetStartedBtn" type="button" style="cursor: pointer;">Get Started</button>
         <a class="chip" href="https://github.com/oneclick-portfolio/oneclick-portfolio.github.io" target="_blank"
           rel="noopener">GitHub
@@ -1700,6 +1809,55 @@
       const ghStatus = document.getElementById('ghStatus');
       const ghConnectBtn = document.getElementById('ghConnectBtn');
 
+      // Cookie warning banner state
+      const cookieWarningBanner = document.getElementById('cookie-warning-banner');
+      const cookieWarningTitle = document.getElementById('cookie-warning-title');
+      const cookieWarningText = document.getElementById('cookie-warning-text');
+      const cookieWarningReload = document.getElementById('cookie-warning-reload');
+      const cookieWarningDismiss = document.getElementById('cookie-warning-dismiss');
+      let justReturnedFromOAuth = window.location.search.indexOf('connected=1') !== -1;
+      const COOKIE_DISMISS_KEY = 'ocpf-cookie-warning-dismissed';
+
+      // Show/hide cookie warning banner
+      function maybeShowCookieBanner() {
+        if (!cookieWarningBanner) return;
+
+        // Only show if we just returned from OAuth AND auth failed (isAuthed = false)
+        if (!justReturnedFromOAuth) return;
+
+        const isDismissed = localStorage.getItem(COOKIE_DISMISS_KEY) === 'true';
+        if (isDismissed) return;
+
+        cookieWarningTitle.textContent = 'Cookies are blocked';
+        cookieWarningText.textContent = 'Your browser is blocking cross-site cookies needed for authentication. Please enable third-party cookies for this site in your browser settings, then reload.';
+
+        cookieWarningBanner.hidden = false;
+      }
+
+      function hideCookieBanner() {
+        if (cookieWarningBanner) {
+          cookieWarningBanner.hidden = true;
+        }
+        // Clear the OAuth flag so banner doesn't show on subsequent page loads
+        justReturnedFromOAuth = false;
+      }
+
+      if (cookieWarningReload) {
+        cookieWarningReload.addEventListener('click', () => {
+          // Clear dismissal so banner re-appears if auth still fails
+          localStorage.removeItem(COOKIE_DISMISS_KEY);
+          window.location.reload();
+        });
+      }
+
+      if (cookieWarningDismiss) {
+        cookieWarningDismiss.addEventListener('click', () => {
+          // Dismiss for this session, but will resurface after a new OAuth attempt
+          localStorage.setItem(COOKIE_DISMISS_KEY, 'true');
+          hideCookieBanner();
+        });
+      }
+
       const ghDisconnectBtn = document.getElementById('ghDisconnectBtn');
       const authContinueBtn = document.getElementById('authContinueBtn');
       const deployButton = document.getElementById('deployButton');
@@ -1730,6 +1888,8 @@
       const preStepsContent = document.getElementById('preStepsContent');
       const focusStepsBtn = document.getElementById('focusStepsBtn');
       const topbarGetStartedBtn = document.getElementById('topbarGetStartedBtn');
+      const topbarHowItWorksBtn = document.getElementById('topbarHowItWorksBtn');
+      const topbarThemesBtn = document.getElementById('topbarThemesBtn');
 
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
@@ -1866,11 +2026,36 @@
         }
       }
 
+      function exitFlowAndNavigateTo(sectionId) {
+        // Exit the step flow
+        hasStartedFlow = false;
+        if (preStepsContent) preStepsContent.hidden = false;
+        // Hide all step sections when exiting flow
+        stepSections.forEach((section) => {
+          section.hidden = true;
+        });
+        const indicator = document.getElementById('step-indicator');
+        if (indicator) indicator.hidden = true;
+        // Scroll to target section
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+          targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
       if (focusStepsBtn) {
         focusStepsBtn.addEventListener('click', focusOnSteps);
       }
       if (topbarGetStartedBtn) {
         topbarGetStartedBtn.addEventListener('click', focusOnSteps);
+      }
+
+      if (topbarHowItWorksBtn) {
+        topbarHowItWorksBtn.addEventListener('click', () => exitFlowAndNavigateTo('how-it-works'));
+      }
+
+      if (topbarThemesBtn) {
+        topbarThemesBtn.addEventListener('click', () => exitFlowAndNavigateTo('theme-showcase'));
       }
 
       if (authContinueBtn) {
@@ -2023,6 +2208,10 @@
             if (topbarDisconnectBtn) topbarDisconnectBtn.hidden = true;
             setConnectTargets(authStartUrl(), 'Authorize GitHub');
             setStep(1);
+            // Show cookie warning if we just returned from OAuth
+            if (justReturnedFromOAuth) {
+              maybeShowCookieBanner();
+            }
             return null;
           }
 
@@ -2054,6 +2243,8 @@
           }
 
           isAuthed = true;
+          // Hide cookie banner on successful auth
+          hideCookieBanner();
           const repoSelection = payload && payload.githubApp && payload.githubApp.repositorySelection;
           if (repoSelection === 'selected') {
             setStatus('Connected as @' + login + ' — App installed for select repos only. New repo creation may fail.');
@@ -2076,6 +2267,10 @@
           setConnectTargets(authStartUrl(), 'Authorize GitHub');
           ghDisconnectBtn.hidden = true;
           setStep(1);
+          // Show cookie warning on network/auth error if we just returned from OAuth
+          if (justReturnedFromOAuth) {
+            maybeShowCookieBanner();
+          }
           return null;
         }
       }
@@ -2159,8 +2354,10 @@
         });
       });
 
-      if (window.location.search.indexOf('connected=1') !== -1) {
+      if (justReturnedFromOAuth) {
         setStatus('GitHub connected. Continue to step 2.');
+        // Clear dismissal flag when a new OAuth attempt is made
+        localStorage.removeItem(COOKIE_DISMISS_KEY);
         window.history.replaceState({}, document.title, window.location.pathname);
       }
 
