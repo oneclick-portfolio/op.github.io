@@ -472,6 +472,59 @@
       line-height: 1.5;
     }
 
+    .auth-flow {
+      display: grid;
+      gap: 12px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .auth-flow-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-ghost);
+      border-radius: 12px;
+      background: var(--surface-container-low);
+    }
+
+    .auth-flow-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--surface-container-high);
+      color: var(--on-surface-variant);
+      border: 1px solid var(--outline-variant);
+      flex-shrink: 0;
+    }
+
+    .auth-flow-badge.is-done {
+      background: var(--primary-fixed);
+      color: var(--primary);
+      border-color: transparent;
+    }
+
+    .auth-flow-title {
+      margin: 0;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .auth-flow-sub {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--on-surface-variant);
+    }
+
     .upload-status {
       margin-top: 16px;
       display: block;
@@ -1267,7 +1320,7 @@
         <a class="chip" href="https://github.com/oneclick-portfolio/oneclick-portfolio.github.io" target="_blank"
           rel="noopener">GitHub
           Repository</a>
-        <button class="chip disconnect-btn" id="topbarDisconnectBtn" type="button" hidden style="color: var(--error); cursor: pointer; border-color: var(--error); background: transparent;">Disconnect</button>
+        <button class="chip disconnect-btn" id="topbarDisconnectBtn" type="button" hidden style="color: var(--error); cursor: pointer; border-color: var(--error); background: transparent;">Log out</button>
       </nav>
 
     </header>
@@ -1374,13 +1427,29 @@
     </div>
 
     <section id="auth" class="step-section">
-      <h2 class="section-title">Step 1: Connect GitHub</h2>
-      <p class="section-sub">Connect GitHub to create a repository and deploy your portfolio.</p>
+      <h2 class="section-title">Step 1: Log In & Install App</h2>
+      <p class="section-sub">Complete these two actions: log in with GitHub, then install the OneClick Portfolio GitHub App.</p>
       <article class="panel auth-panel">
-        <h3 id="authStatusTitle">Authorize your Github Account</h3>
-        <a class="btn btn-primary" id="ghConnectBtn" href="#">Connect GitHub</a>
-        <button class="btn btn-ghost disconnect-btn" id="ghDisconnectBtn" type="button" hidden>Disconnect</button>
-        <p class="auth-note" id="ghStatus">GitHub App not connected</p>
+        <h3 id="authStatusTitle">Step 1: Log in with GitHub</h3>
+        <div class="auth-flow" aria-label="GitHub setup checklist">
+          <div class="auth-flow-step">
+            <span class="auth-flow-badge" id="authLoginState">1</span>
+            <div>
+              <p class="auth-flow-title">Log in with GitHub</p>
+              <p class="auth-flow-sub">Authorize your GitHub account to continue.</p>
+            </div>
+          </div>
+          <div class="auth-flow-step">
+            <span class="auth-flow-badge" id="authInstallState">2</span>
+            <div>
+              <p class="auth-flow-title">Install OneClick Portfolio App</p>
+              <p class="auth-flow-sub">Install the app so it can create and deploy your portfolio repository.</p>
+            </div>
+          </div>
+        </div>
+        <a class="btn btn-primary" id="ghConnectBtn" href="#">Log in with GitHub</a>
+        <button class="btn btn-ghost disconnect-btn" id="ghDisconnectBtn" type="button" hidden>Log out</button>
+        <p class="auth-note" id="ghStatus">Pending: GitHub login and app installation.</p>
         <ul class="mini-list" style="margin-top: 10px;">
           <li>Tip: choose <strong>All repositories</strong> during app install for the easiest setup.</li>
         </ul>
@@ -1415,9 +1484,9 @@
         <article class="panel">
           <h3>How to Export from rxresu.me</h3>
           <p>Export your resume JSON from the editor, then upload it here.</p>
-          <a class="btn" href="https://rxresu.me" target="_blank" rel="noopener">Open rxresu.me Editor</a>
+          <a class="btn" href="https://rxresu.me" target="_blank" rel="noopener">Open rxresu.me</a>
           <ul class="mini-list" style="margin-top: 10px;">
-            <li>Go to your resume in the rxresu.me editor.</li>
+            <li>Go to your resume in the rxresu.me.</li>
             <li>Use the export/download action for JSON format.</li>
             <li>Upload that downloaded file above and validate it.</li>
           </ul>
@@ -1425,7 +1494,7 @@
       </div>
       <div class="step-nav" style="margin-top: 32px;">
         <button class="btn btn-ghost" type="button" data-go-step="1">← Back</button>
-        <button class="btn btn-ghost disconnect-btn" type="button" style="color: var(--error); font-size: 13px;">Disconnect GitHub</button>
+        <button class="btn btn-ghost disconnect-btn" type="button" style="color: var(--error); font-size: 13px;">Log out</button>
       </div>
     </section>
 
@@ -1815,7 +1884,8 @@
       const cookieWarningText = document.getElementById('cookie-warning-text');
       const cookieWarningReload = document.getElementById('cookie-warning-reload');
       const cookieWarningDismiss = document.getElementById('cookie-warning-dismiss');
-      let justReturnedFromOAuth = window.location.search.indexOf('connected=1') !== -1;
+      const OAUTH_ATTEMPT_KEY = 'ocpf-oauth-attempted';
+      let justReturnedFromOAuth = window.location.search.indexOf('connected=1') !== -1 || localStorage.getItem(OAUTH_ATTEMPT_KEY) === 'true';
       const COOKIE_DISMISS_KEY = 'ocpf-cookie-warning-dismissed';
 
       // Show/hide cookie warning banner
@@ -1840,6 +1910,7 @@
         }
         // Clear the OAuth flag so banner doesn't show on subsequent page loads
         justReturnedFromOAuth = false;
+        localStorage.removeItem(OAUTH_ATTEMPT_KEY);
       }
 
       if (cookieWarningReload) {
@@ -1870,6 +1941,8 @@
       const manageSiteLink = document.getElementById('manageSiteLink');
       const authStatusTitle = document.getElementById('authStatusTitle');
       const topbarDisconnectBtn = document.getElementById('topbarDisconnectBtn');
+      const authLoginState = document.getElementById('authLoginState');
+      const authInstallState = document.getElementById('authInstallState');
 
       const resumeJsonFileInput = document.getElementById('resumeJsonFile');
       const validateResumeBtn = document.getElementById('validateResumeBtn');
@@ -1902,7 +1975,7 @@
       let validatedResumeData = null;
 
       viewRepoLink.href = REPO_URL;
-      setConnectTargets(authStartUrl(), 'Authorize GitHub');
+      setConnectTargets(authStartUrl(), 'Log in with GitHub');
 
       function apiUrl(path) {
         return API_BASE + path;
@@ -1980,6 +2053,23 @@
 
       function setConnectTargets(url, label) {
         ghConnectBtn.href = url;
+        if (label) ghConnectBtn.textContent = label;
+      }
+
+      function markOAuthAttempt() {
+        localStorage.setItem(OAUTH_ATTEMPT_KEY, 'true');
+        localStorage.removeItem(COOKIE_DISMISS_KEY);
+      }
+
+      function setAuthFlowState(loginDone, installDone) {
+        if (authLoginState) {
+          authLoginState.classList.toggle('is-done', loginDone);
+          authLoginState.textContent = loginDone ? '✓' : '1';
+        }
+        if (authInstallState) {
+          authInstallState.classList.toggle('is-done', installDone);
+          authInstallState.textContent = installDone ? '✓' : '2';
+        }
       }
 
       function setStep(stepNumber) {
@@ -2060,6 +2150,12 @@
 
       if (authContinueBtn) {
         authContinueBtn.addEventListener('click', () => setStep(2));
+      }
+
+      if (ghConnectBtn) {
+        ghConnectBtn.addEventListener('click', () => {
+          markOAuthAttempt();
+        });
       }
 
       // Wire up data-go-step back buttons
@@ -2201,12 +2297,13 @@
           const response = await fetch(apiUrl('/api/github/me'), { credentials: 'include' });
           if (!response.ok) {
             isAuthed = false;
-            setStatus('GitHub App not connected');
-            authStatusTitle.textContent = 'Connect your Github Account';
+            setStatus('Pending: GitHub login and app installation.');
+            authStatusTitle.textContent = 'Step 1: Log in with GitHub';
             ghConnectBtn.hidden = false;
                 ghDisconnectBtn.hidden = true;
             if (topbarDisconnectBtn) topbarDisconnectBtn.hidden = true;
-            setConnectTargets(authStartUrl(), 'Authorize GitHub');
+            setConnectTargets(authStartUrl(), 'Log in with GitHub');
+            setAuthFlowState(false, false);
             setStep(1);
             // Show cookie warning if we just returned from OAuth
             if (justReturnedFromOAuth) {
@@ -2220,11 +2317,12 @@
           const appInstalled = Boolean(payload && payload.githubApp && payload.githubApp.installed);
           if (!login) {
             isAuthed = false;
-            setStatus('GitHub App not connected');
+            setStatus('Pending: GitHub login and app installation.');
             ghConnectBtn.hidden = false;
                 ghDisconnectBtn.hidden = true;
             if (topbarDisconnectBtn) topbarDisconnectBtn.hidden = true;
-            setConnectTargets(authStartUrl(), 'Authorize GitHub');
+            setConnectTargets(authStartUrl(), 'Log in with GitHub');
+            setAuthFlowState(false, false);
             setStep(1);
             return null;
           }
@@ -2232,12 +2330,13 @@
           if (!appInstalled) {
             isAuthed = false;
             const installUrl = payload && payload.githubApp && payload.githubApp.installUrl;
-            setStatus(installUrl ? 'Install GitHub App to continue' : 'GitHub App installation required');
-            authStatusTitle.textContent = 'Install GitHub App';
+            setStatus(installUrl ? 'Step 2 pending: install the OneClick Portfolio App.' : 'GitHub App installation required.');
+            authStatusTitle.textContent = 'Step 2: Install OneClick Portfolio App';
             ghConnectBtn.hidden = false;
                 ghDisconnectBtn.hidden = true;
             if (topbarDisconnectBtn) topbarDisconnectBtn.hidden = true;
-            setConnectTargets(installUrl || authStartUrl(), installUrl ? 'Install GitHub App' : 'Authorize GitHub');
+            setConnectTargets(installUrl || authStartUrl(), installUrl ? 'Install OneClick Portfolio App' : 'Log in with GitHub');
+            setAuthFlowState(true, false);
             setStep(1);
             return payload.user;
           }
@@ -2251,20 +2350,23 @@
           } else {
             setStatus('Connected as @' + login);
           }
-          authStatusTitle.textContent = 'Connected';
+          authStatusTitle.textContent = 'GitHub Login + App Install Complete';
           ghConnectBtn.hidden = true;
           ghDisconnectBtn.hidden = false;
           if (authContinueBtn) authContinueBtn.hidden = false;
           if (topbarDisconnectBtn) topbarDisconnectBtn.hidden = false;
           setConnectTargets(authStartUrl(), 'Connected');
+          setAuthFlowState(true, true);
           if (currentStep === 1) setStep(2);
           setDeployEnabled(currentStep === 4);
           return payload.user;
         } catch (error) {
           isAuthed = false;
           console.error(error);
-          setStatus('GitHub App status unavailable');
-          setConnectTargets(authStartUrl(), 'Authorize GitHub');
+          setStatus('GitHub status unavailable. Please log in and install the app again.');
+          authStatusTitle.textContent = 'Step 1: Log in with GitHub';
+          setConnectTargets(authStartUrl(), 'Log in with GitHub');
+          setAuthFlowState(false, false);
           ghDisconnectBtn.hidden = true;
           setStep(1);
           // Show cookie warning on network/auth error if we just returned from OAuth
@@ -2346,7 +2448,13 @@
         btn.addEventListener('click', async () => {
           try {
             await fetch(apiUrl('/api/github/logout'), { method: 'POST', credentials: 'include' });
+          } catch (error) {
+            console.error('Logout error:', error);
           } finally {
+            // Clear session and local state
+            localStorage.removeItem(COOKIE_DISMISS_KEY);
+            localStorage.removeItem(OAUTH_ATTEMPT_KEY);
+            validatedResumeData = null;
             await updateAuthStatus();
             hideDeployResult();
             setStep(1);
@@ -2355,9 +2463,12 @@
       });
 
       if (justReturnedFromOAuth) {
+        hasStartedFlow = true;
+        if (preStepsContent) preStepsContent.hidden = true;
         setStatus('GitHub connected. Continue to step 2.');
         // Clear dismissal flag when a new OAuth attempt is made
         localStorage.removeItem(COOKIE_DISMISS_KEY);
+        localStorage.removeItem(OAUTH_ATTEMPT_KEY);
         window.history.replaceState({}, document.title, window.location.pathname);
       }
 
